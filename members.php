@@ -1,13 +1,22 @@
 <?php
-
 include 'config.php';
 
-if (isset($_GET['id'])){
-  $id=$_GET['id'];
-  $delete=mysqli_query($connection,"DELETE FROM `members` WHERE `id` = $id");
+$success_msg = '';
+$error_msg = '';
+
+// Handle member deletion
+if (isset($_GET['id'])) {
+  $id = mysqli_real_escape_string($connection, $_GET['id']);
+  $delete = mysqli_query($connection, "DELETE FROM `members` WHERE `id` = '$id'");
+  if ($delete) {
+    $success_msg = "Member deleted successfully!";
+  } else {
+    $error_msg = "Error deleting member: " . mysqli_error($connection);
+  }
 }
 
-if(isset($_REQUEST["submit"])){
+// Handle new member submission
+if (isset($_REQUEST["submit"])) {
   $id = mysqli_real_escape_string($connection, $_REQUEST["id"]);
   $name = mysqli_real_escape_string($connection, $_REQUEST["name"]);
   $gender = mysqli_real_escape_string($connection, $_REQUEST["gender"]);
@@ -17,274 +26,362 @@ if(isset($_REQUEST["submit"])){
   $batch = mysqli_real_escape_string($connection, $_REQUEST["batch"]);
 
   // Validate required fields
-  if(empty($name) || empty($trainer_id) || empty($package_id)) {
-    $message = "Please fill in all required fields.";
-    $messageType = "error";
+  if (empty($name) || empty($trainer_id) || empty($package_id)) {
+    $error_msg = "Please fill in all required fields.";
   } else {
-
-    $ins = "INSERT INTO members(id, name, gender, dob, trainer_id, package_id, batch) 
-            VALUES ('$id', '$name', '$gender', '$dob', '$trainer_id', '$package_id', '$batch')";
+    $ins = "INSERT INTO members(id, name, gender, dob, trainer_id, package_id, batch, transaction_id) 
+                VALUES ('$id', '$name', '$gender', '$dob', '$trainer_id', '$package_id', '$batch', 0)";
     $query1 = mysqli_query($connection, $ins);
-    
-    if($query1) {
-      $message = "Member registered successfully!";
-      $messageType = "success";
-      // Clear form
-      $_POST = array();
+
+    if ($query1) {
+      $success_msg = "Member registered successfully! Member ID: #" . $id;
+      $_POST = array(); // Clear form
     } else {
-      $message = "Error: " . mysqli_error($connection);
-      $messageType = "error";
+      $error_msg = "Error: " . mysqli_error($connection);
     }
   }
 }
 
-?>
+// Function to generate a unique 4-digit member ID
+function generateMemberID($connection)
+{
+  $unique = false;
+  $maxAttempts = 100;
+  $attempts = 0;
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-</head>
-<body>
-     <!-- nav bar start -->
-     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="admin-login.php"><img src="img/mylogo.png" alt="logo"></a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href="http://localhost/phpmyadmin/index.php?route=/database/structure&db=nsfitness">Gym Management System</a>
-      </li>
-      <li class="nav-item">
-      <a class="nav-link" href="packages.php">Packages</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="trainers.php">Trainers</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="members.php">Members</a>
-      </li>
-      <li class="nav-item">
-      <a class="nav-link" href="transaction.php">Billing</a>
-      </li>
-    </ul>
-  </div>
-</nav>
-    <!-- nav bar end -->
-
-          <!-- form start -->
-
-  <form method="POST" action="">
-  <?php
-  // Function to generate a unique 4-digit member ID
-  function generateMemberID($connection) {
-    $unique = false;
-    $maxAttempts = 100; // Prevent infinite loops
-    $attempts = 0;
-    
-    while (!$unique && $attempts < $maxAttempts) {
-      // Generate a random 4-digit number
-      $newID = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-      
-      // Check if ID already exists
-      $check = mysqli_query($connection, "SELECT id FROM members WHERE id = '$newID'");
-      if (mysqli_num_rows($check) === 0) {
-        $unique = true;
-      }
-      $attempts++;
+  while (!$unique && $attempts < $maxAttempts) {
+    $newID = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+    $check = mysqli_query($connection, "SELECT id FROM members WHERE id = '$newID'");
+    if (mysqli_num_rows($check) === 0) {
+      $unique = true;
     }
-    
-    return $unique ? $newID : false;
+    $attempts++;
   }
-  
-  // Generate a new member ID
-  $newMemberID = generateMemberID($connection);
-  ?>
-  
-  <input type="hidden" name="id" value="<?php echo $newMemberID; ?>">
-  
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label>Member ID</label>
-      <div class="form-control bg-light"><?php echo $newMemberID; ?></div>
-      <small class="form-text text-muted">Auto-generated Member ID</small>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="name">Member Name</label>
-      <input type="text" name="name" class="form-control" id="name" placeholder="Enter full name" required>
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="inputAddress">Gender</label>
-    <input type="text" name="gender" class="form-control" id="inputAddress" placeholder="M/F">
-  </div>
-  <div class="form-group">
-    <label for="inputAddress2">Date of Birth</label>
-    <input type="text" name="dob" class="form-control" id="inputAddress2" placeholder="yyyy-mm-dd">
-  </div>
-  <div class="form-group">
-    <label for="trainer_select">Select Trainer</label>
-    <select name="trainer_id" class="form-control" id="trainer_select" required>
-      <option value="">-- Select Trainer --</option>
-      <?php
-      $trainers_query = "SELECT id, name FROM trainers ORDER BY name";
-      $trainers_result = mysqli_query($connection, $trainers_query);
-      if(mysqli_num_rows($trainers_result) > 0) {
-        while($trainer = mysqli_fetch_assoc($trainers_result)) {
-          echo '<option value="'.$trainer['id'].'">'.$trainer['name'].'</option>';
-        }
-      } else {
-        echo '<option value="" disabled>No trainers available. Please add trainers first.</option>';
-      }
-      ?>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="package_id">Select Package</label>
-    <select name="package_id" class="form-control" id="package_id" required>
-      <option value="">-- Select Package --</option>
-      <?php
-      $packages_query = "SELECT * FROM packages ORDER BY name";
-      $packages_result = mysqli_query($connection, $packages_query);
-      if(mysqli_num_rows($packages_result) > 0) {
-        while($row = mysqli_fetch_assoc($packages_result)) {
-          echo '<option value="'.$row['id'].'">'.$row['name'].' - $'.$row['amount'].'</option>';
-        }
-      } else {
-        echo '<option value="" disabled>No packages available. Please add packages first.</option>';
-      }
-      ?>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="batch">Select Batch</label>
-    <select name="batch" class="form-control" id="batch" required>
-      <option value="">-- Select Batch --</option>
-      <option value="MORNING">Morning</option>
-      <option value="EVENING">Evening</option>
-    </select>
-  </div>
 
-  <div class="form-group">
-    <input type="submit" name="submit" class="btn btn-primary" value="Register Member">
-  </div>
-</form>
-
-
-
-  <!-- form end -->
-
-
-
-
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-</body>
-</html>
-
-
-
-
-
-
-<?php
-// Function to get trainer name by ID
-function getTrainerName($connection, $trainer_id) {
-    $query = "SELECT name FROM trainers WHERE id = '$trainer_id' LIMIT 1";
-    $result = mysqli_query($connection, $query);
-    if($result && mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_assoc($result);
-        return $row['name'];
-    }
-    return 'N/A';
+  return $unique ? $newID : false;
 }
 
-// Function to get package name by ID
-function getPackageName($connection, $package_id) {
-    $query = "SELECT name FROM packages WHERE id = '$package_id' LIMIT 1";
-    $result = mysqli_query($connection, $query);
-    if($result && mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_assoc($result);
-        return $row['name'];
-    }
-    return 'N/A';
-}
+// Get statistics
+$total_members_query = mysqli_query($connection, "SELECT COUNT(*) as total FROM members");
+$total_members = mysqli_fetch_assoc($total_members_query)['total'];
 
-$query = "SELECT * FROM members ORDER BY id DESC";
+$morning_batch_query = mysqli_query($connection, "SELECT COUNT(*) as total FROM members WHERE batch = 'MORNING'");
+$morning_batch = mysqli_fetch_assoc($morning_batch_query)['total'];
+
+$evening_batch_query = mysqli_query($connection, "SELECT COUNT(*) as total FROM members WHERE batch = 'EVENING'");
+$evening_batch = mysqli_fetch_assoc($evening_batch_query)['total'];
+
+// Get all members with trainer and package details
+$query = "SELECT m.*, t.name as trainer_name, p.name as package_name, p.price as package_price 
+          FROM members m 
+          LEFT JOIN trainers t ON m.trainer_id = t.id 
+          LEFT JOIN packages p ON m.package_id = p.id 
+          ORDER BY m.id DESC";
 $result = mysqli_query($connection, $query);
-?>
 
+// Get trainers for dropdown
+$trainers_query = "SELECT id, name FROM trainers ORDER BY name";
+$trainers_result = mysqli_query($connection, $trainers_query);
+
+// Get packages for dropdown
+$packages_query = "SELECT * FROM packages ORDER BY name";
+$packages_result = mysqli_query($connection, $packages_query);
+
+// Generate new member ID
+$newMemberID = generateMemberID($connection);
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Members - Gym Management System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin-styles.css">
 </head>
+
 <body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="admin-login.php">
+      <i class="fas fa-dumbbell"></i> NS FITNESS
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="packages.php"><i class="fas fa-box"></i> Packages</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="trainers.php"><i class="fas fa-user-tie"></i> Trainers</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="members.php"><i class="fas fa-users"></i> Members</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="transaction.php"><i class="fas fa-credit-card"></i> Billing</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="index.html"><i class="fas fa-home"></i> Home</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
-<!-- Data table-->
+  <div class="main-container">
+    <!-- Page Header -->
+    <div class="page-header fade-in">
+      <h1><i class="fas fa-id-card"></i> Gym Members</h1>
+      <p>Register and manage gym member registrations</p>
+    </div>
 
-<table id="members" class="table table-striped table-bordered">
-  <thead class="thead-dark">
-    <tr>
-      <th>ID</th>
-      <th>Member Name</th>
-      <th>Gender</th>
-      <th>Date of Birth</th>
-      <th>Trainer</th>
-      <th>Package</th>
-      <th>Batch</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-    <?php
-    while($row = mysqli_fetch_array($result))
-    {
-      echo '
-      <tr> 
-          <td>'.$row["id"].'</td>
-          <td>'.$row["name"].'</td>
-          <td>'.strtoupper($row["gender"]).'</td>
-          <td>'.date('M d, Y', strtotime($row["dob"])).'</td>
-          <td>'.getTrainerName($connection, $row["trainer_id"]).'</td>
-          <td>'.getPackageName($connection, $row["package_id"]).'</td>
-          <td>'.ucfirst(strtolower($row["batch"])).'</td>
-          <td>
-            <a href="members.php?id='.$row['id'].'" class="btn btn-danger btn-sm" onclick="return confirm(\'Are you sure you want to delete this member?\')">Delete</a>
-          </td>
-      </tr>
-      ';
-    }
+    <!-- Statistics -->
+    <div class="stats-container fade-in">
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value"><?php echo $total_members; ?></div>
+        <div class="stat-label">Total Members</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <i class="fas fa-sun"></i>
+        </div>
+        <div class="stat-value"><?php echo $morning_batch; ?></div>
+        <div class="stat-label">Morning Batch</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">
+          <i class="fas fa-moon"></i>
+        </div>
+        <div class="stat-value"><?php echo $evening_batch; ?></div>
+        <div class="stat-label">Evening Batch</div>
+      </div>
+    </div>
 
-    
-    ?>
-    
-</table>
+    <!-- Alerts -->
+    <?php if (!empty($success_msg)): ?>
+      <div class="alert alert-success fade-in">
+        <i class="fas fa-check-circle"></i> <?php echo $success_msg; ?>
+      </div>
+    <?php endif; ?>
+    <?php if (!empty($error_msg)): ?>
+      <div class="alert alert-danger fade-in">
+        <i class="fas fa-exclamation-circle"></i> <?php echo $error_msg; ?>
+      </div>
+    <?php endif; ?>
 
-<!-- Data table-->
+    <!-- Add Member Form -->
+    <div class="form-card fade-in">
+      <h3><i class="fas fa-user-plus"></i> Register New Member</h3>
+      <form method="POST" action="">
+        <input type="hidden" name="id" value="<?php echo $newMemberID; ?>">
 
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label><i class="fas fa-hashtag"></i> Member ID</label>
+              <div class="form-control bg-light" style="font-weight: 700; color: #667eea;">
+                #<?php echo $newMemberID; ?>
+              </div>
+              <small class="text-muted">Auto-generated unique ID</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="name"><i class="fas fa-user"></i> Member Name *</label>
+              <input type="text" name="name" id="name" class="form-control" placeholder="Enter full name" required>
+            </div>
+          </div>
+        </div>
 
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-</body>
-</html>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+              <select name="gender" id="gender" class="form-control">
+                <option value="">-- Select Gender --</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="dob"><i class="fas fa-calendar"></i> Date of Birth</label>
+              <input type="date" name="dob" id="dob" class="form-control">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="batch"><i class="fas fa-clock"></i> Batch *</label>
+              <select name="batch" id="batch" class="form-control" required>
+                <option value="">-- Select Batch --</option>
+                <option value="MORNING">Morning</option>
+                <option value="EVENING">Evening</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-<script>
-$(document).ready(function(){
-    $('members').DataTable();
-});
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="trainer_id"><i class="fas fa-user-tie"></i> Assign Trainer *</label>
+              <select name="trainer_id" id="trainer_id" class="form-control" required>
+                <option value="">-- Select Trainer --</option>
+                <?php
+                if (mysqli_num_rows($trainers_result) > 0) {
+                  while ($trainer = mysqli_fetch_assoc($trainers_result)) {
+                    echo '<option value="' . $trainer['id'] . '">' . $trainer['name'] . '</option>';
+                  }
+                } else {
+                  echo '<option value="" disabled>No trainers available</option>';
+                }
+                ?>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="package_id"><i class="fas fa-box"></i> Select Package *</label>
+              <select name="package_id" id="package_id" class="form-control" required>
+                <option value="">-- Select Package --</option>
+                <?php
+                if (mysqli_num_rows($packages_result) > 0) {
+                  while ($package = mysqli_fetch_assoc($packages_result)) {
+                    echo '<option value="' . $package['id'] . '">' . $package['name'] . ' - ₹' . $package['price'] . '</option>';
+                  }
+                } else {
+                  echo '<option value="" disabled>No packages available</option>';
+                }
+                ?>
+              </select>
+            </div>
+          </div>
+        </div>
 
+        <button type="submit" name="submit" class="btn-submit">
+          <i class="fas fa-save"></i> Register Member
+        </button>
+      </form>
+    </div>
 
+    <!-- Members List -->
+    <div class="data-section fade-in">
+      <h3><i class="fas fa-list"></i> All Members</h3>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>Date of Birth</th>
+              <th>Trainer</th>
+              <th>Package</th>
+              <th>Batch</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            if (mysqli_num_rows($result) > 0):
+              while ($row = mysqli_fetch_assoc($result)):
+                $age = $row['dob'] ? date_diff(date_create($row['dob']), date_create('today'))->y : 'N/A';
+                ?>
+                <tr>
+                  <td><strong>#<?php echo $row['id']; ?></strong></td>
+                  <td>
+                    <i class="fas fa-user-circle" style="color: #667eea; margin-right: 0.5rem;"></i>
+                    <strong><?php echo $row['name']; ?></strong>
+                  </td>
+                  <td>
+                    <?php if ($row['gender'] == 'M'): ?>
+                      <span class="badge badge-info">
+                        <i class="fas fa-male"></i> Male
+                      </span>
+                    <?php elseif ($row['gender'] == 'F'): ?>
+                      <span class="badge badge-warning">
+                        <i class="fas fa-female"></i> Female
+                      </span>
+                    <?php else: ?>
+                      <span class="badge badge-secondary">N/A</span>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <?php echo $row['dob'] ? date('M d, Y', strtotime($row['dob'])) : 'N/A'; ?>
+                    <?php if ($age !== 'N/A'): ?>
+                      <br><small class="text-muted"><?php echo $age; ?> years old</small>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <i class="fas fa-user-tie" style="color: #11998e; margin-right: 0.3rem;"></i>
+                    <?php echo $row['trainer_name'] ? $row['trainer_name'] : '<em>Not assigned</em>'; ?>
+                  </td>
+                  <td>
+                    <strong style="color: #667eea;">
+                      <?php echo $row['package_name'] ? $row['package_name'] : '<em>None</em>'; ?>
+                    </strong>
+                    <?php if ($row['package_price']): ?>
+                      <br><small class="text-muted">₹<?php echo $row['package_price']; ?></small>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <?php if ($row['batch'] == 'MORNING'): ?>
+                      <span class="badge badge-success">
+                        <i class="fas fa-sun"></i> Morning
+                      </span>
+                    <?php elseif ($row['batch'] == 'EVENING'): ?>
+                      <span class="badge badge-primary">
+                        <i class="fas fa-moon"></i> Evening
+                      </span>
+                    <?php else: ?>
+                      <span class="badge badge-secondary">N/A</span>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <a href="members.php?id=<?php echo $row['id']; ?>" class="btn-delete"
+                      onclick="return confirm('Are you sure you want to delete this member?')">
+                      <i class="fas fa-trash"></i> Delete
+                    </a>
+                  </td>
+                </tr>
+                    <?php
+              endwhile;
+            else:
+              ?>
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <i class="fas fa-user-slash"></i>
+                    <p>No members found. Register your first member above!</p>
+                  </div>
+                </td>
+              </tr>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+  <script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function () {
+      $('.alert').fadeOut('slow');
+    }, 5000);
   </script>
+</body>
+
+</html>
