@@ -6,49 +6,49 @@ $error_msg = '';
 
 // Handle trainer deletion
 if (isset($_GET['id'])) {
-  $id = mysqli_real_escape_string($connection, $_GET['id']);
+    $id = mysqli_real_escape_string($connection, $_GET['id']);
 
-  // Check if there are any members assigned to this trainer
-  $check_query = "SELECT COUNT(*) as member_count FROM members WHERE trainer_id = '$id'";
-  $result = mysqli_query($connection, $check_query);
-  $row = mysqli_fetch_assoc($result);
+    // Check if there are any members assigned to this trainer
+    $check_query = "SELECT COUNT(*) as member_count FROM members WHERE trainer_id = '$id'";
+    $result = mysqli_query($connection, $check_query);
+    $row = mysqli_fetch_assoc($result);
 
-  if ($row['member_count'] > 0) {
-    $error_msg = "Cannot delete trainer: " . $row['member_count'] . " member(s) are assigned to this trainer.";
-  } else {
-    $delete = mysqli_query($connection, "DELETE FROM `trainers` WHERE `id` = '$id'");
-    if ($delete) {
-      $success_msg = "Trainer deleted successfully!";
+    if ($row['member_count'] > 0) {
+        $error_msg = "Cannot delete trainer: " . $row['member_count'] . " member(s) are assigned to this trainer.";
     } else {
-      $error_msg = "Error deleting trainer: " . mysqli_error($connection);
+        $delete = mysqli_query($connection, "DELETE FROM `trainers` WHERE `id` = '$id'");
+        if ($delete) {
+            $success_msg = "Trainer deleted successfully!";
+        } else {
+            $error_msg = "Error deleting trainer: " . mysqli_error($connection);
+        }
     }
-  }
 }
 
 // Handle new trainer submission
 if (isset($_REQUEST["submit"])) {
-  $id = mysqli_real_escape_string($connection, $_REQUEST["id"]);
-  $name = mysqli_real_escape_string($connection, $_REQUEST["name"]);
-  $dob = mysqli_real_escape_string($connection, $_REQUEST["dob"]);
-  $gender = mysqli_real_escape_string($connection, $_REQUEST["gender"]);
-  $experience = mysqli_real_escape_string($connection, $_REQUEST["experience"]);
+    $id = mysqli_real_escape_string($connection, $_REQUEST["id"]);
+    $name = mysqli_real_escape_string($connection, $_REQUEST["name"]);
+    $dob = mysqli_real_escape_string($connection, $_REQUEST["dob"]);
+    $gender = mysqli_real_escape_string($connection, $_REQUEST["gender"]);
+    $experience = mysqli_real_escape_string($connection, $_REQUEST["experience"]);
 
-  // Check if trainer with this ID already exists
-  $check = mysqli_query($connection, "SELECT id FROM trainers WHERE id = '$id'");
-  if (mysqli_num_rows($check) > 0) {
-    $error_msg = "Error: A trainer with this ID already exists.";
-  } else {
-    $ins = "INSERT INTO trainers(id, name, dob, gender, experience) 
-                VALUES ('$id', '$name', '$dob', '$gender', '$experience')";
-    $query1 = mysqli_query($connection, $ins);
-
-    if ($query1) {
-      $success_msg = "Trainer added successfully!";
-      $_POST = array(); // Clear form
+    // Check if trainer with this ID already exists
+    $check = mysqli_query($connection, "SELECT id FROM trainers WHERE id = '$id'");
+    if (mysqli_num_rows($check) > 0) {
+        $error_msg = "Error: A trainer with this ID already exists.";
     } else {
-      $error_msg = "Error adding trainer: " . mysqli_error($connection);
+        $ins = "INSERT INTO trainers(id, name, dob, gender, experience) 
+                VALUES ('$id', '$name', '$dob', '$gender', '$experience')";
+        $query1 = mysqli_query($connection, $ins);
+
+        if ($query1) {
+            $success_msg = "Trainer added successfully!";
+            $_POST = array(); // Clear form
+        } else {
+            $error_msg = "Error adding trainer: " . mysqli_error($connection);
+        }
     }
-  }
 }
 
 // Get statistics
@@ -70,6 +70,7 @@ $result = mysqli_query($connection, $query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -80,11 +81,12 @@ $result = mysqli_query($connection, $query);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="admin-styles.css">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <a class="navbar-brand" href="admin-login.php">
-            <i class="fas fa-dumbbell"></i> NS FITNESS
+            <i class="fas fa-dumbbell"></i> CHOLE BHATURE FITNESS
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -144,14 +146,14 @@ $result = mysqli_query($connection, $query);
 
         <!-- Alerts -->
         <?php if (!empty($success_msg)): ?>
-              <div class="alert alert-success fade-in">
-                  <i class="fas fa-check-circle"></i> <?php echo $success_msg; ?>
-              </div>
+            <div class="alert alert-success fade-in">
+                <i class="fas fa-check-circle"></i> <?php echo $success_msg; ?>
+            </div>
         <?php endif; ?>
         <?php if (!empty($error_msg)): ?>
-              <div class="alert alert-danger fade-in">
-                  <i class="fas fa-exclamation-circle"></i> <?php echo $error_msg; ?>
-              </div>
+            <div class="alert alert-danger fade-in">
+                <i class="fas fa-exclamation-circle"></i> <?php echo $error_msg; ?>
+            </div>
         <?php endif; ?>
 
         <!-- Add Trainer Form -->
@@ -162,13 +164,15 @@ $result = mysqli_query($connection, $query);
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="id"><i class="fas fa-hashtag"></i> Trainer ID</label>
-                            <input type="text" name="id" id="id" class="form-control" placeholder="Enter unique ID" required>
+                            <input type="text" name="id" id="id" class="form-control" placeholder="Enter unique ID"
+                                required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="name"><i class="fas fa-user"></i> Trainer Name</label>
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Enter full name" required>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="Enter full name"
+                                required>
                         </div>
                     </div>
                 </div>
@@ -192,7 +196,8 @@ $result = mysqli_query($connection, $query);
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="experience"><i class="fas fa-award"></i> Experience</label>
-                            <input type="text" name="experience" id="experience" class="form-control" placeholder="e.g., 5 YEARS" required>
+                            <input type="text" name="experience" id="experience" class="form-control"
+                                placeholder="e.g., 5 YEARS" required>
                         </div>
                     </div>
                 </div>
@@ -221,9 +226,9 @@ $result = mysqli_query($connection, $query);
                     <tbody>
                         <?php
                         if (mysqli_num_rows($result) > 0):
-                          while ($row = mysqli_fetch_assoc($result)):
-                            $age = date_diff(date_create($row['dob']), date_create('today'))->y;
-                            ?>
+                            while ($row = mysqli_fetch_assoc($result)):
+                                $age = date_diff(date_create($row['dob']), date_create('today'))->y;
+                                ?>
                                 <tr>
                                     <td><strong>#<?php echo $row['id']; ?></strong></td>
                                     <td>
@@ -236,13 +241,13 @@ $result = mysqli_query($connection, $query);
                                     </td>
                                     <td>
                                         <?php if ($row['gender'] == 'M'): ?>
-                                              <span class="badge badge-info">
-                                                  <i class="fas fa-male"></i> Male
-                                              </span>
+                                            <span class="badge badge-info">
+                                                <i class="fas fa-male"></i> Male
+                                            </span>
                                         <?php else: ?>
-                                              <span class="badge badge-warning">
-                                                  <i class="fas fa-female"></i> Female
-                                              </span>
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-female"></i> Female
+                                            </span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -252,35 +257,34 @@ $result = mysqli_query($connection, $query);
                                     </td>
                                     <td>
                                         <?php if ($row['member_count'] > 0): ?>
-                                              <span class="badge badge-primary">
-                                                  <i class="fas fa-users"></i> <?php echo $row['member_count']; ?> members
-                                              </span>
+                                            <span class="badge badge-primary">
+                                                <i class="fas fa-users"></i> <?php echo $row['member_count']; ?> members
+                                            </span>
                                         <?php else: ?>
-                                              <span class="badge badge-secondary">
-                                                  <i class="fas fa-user-slash"></i> No members
-                                              </span>
+                                            <span class="badge badge-secondary">
+                                                <i class="fas fa-user-slash"></i> No members
+                                            </span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <a href="trainers.php?id=<?php echo $row['id']; ?>" 
-                                           class="btn-delete" 
-                                           onclick="return confirm('Are you sure you want to delete this trainer?')">
+                                        <a href="trainers.php?id=<?php echo $row['id']; ?>" class="btn-delete"
+                                            onclick="return confirm('Are you sure you want to delete this trainer?')">
                                             <i class="fas fa-trash"></i> Delete
                                         </a>
                                     </td>
                                 </tr>
-                          <?php
-                          endwhile;
+                                <?php
+                            endwhile;
                         else:
-                          ?>
-                              <tr>
-                                  <td colspan="7">
-                                      <div class="empty-state">
-                                          <i class="fas fa-user-slash"></i>
-                                          <p>No trainers found. Add your first trainer above!</p>
-                                      </div>
-                                  </td>
-                              </tr>
+                            ?>
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <i class="fas fa-user-slash"></i>
+                                        <p>No trainers found. Add your first trainer above!</p>
+                                    </div>
+                                </td>
+                            </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -293,9 +297,10 @@ $result = mysqli_query($connection, $query);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     <script>
         // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             $('.alert').fadeOut('slow');
         }, 5000);
     </script>
 </body>
+
 </html>

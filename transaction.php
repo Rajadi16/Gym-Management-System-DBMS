@@ -523,7 +523,7 @@ $admins = mysqli_query($connection, $admins_query);
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light">
     <a class="navbar-brand" href="admin-login.php">
-      <i class="fas fa-dumbbell"></i> NS FITNESS
+      <i class="fas fa-dumbbell"></i> CHOLE BHATURE FITNESS
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
