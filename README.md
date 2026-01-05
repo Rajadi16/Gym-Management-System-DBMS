@@ -1,8 +1,8 @@
-# 💪 Gym Management System
+# 💪 Chole Bhature Fitness - Gym Management System
 
 <div align="center">
 
-![Gym Management](https://img.shields.io/badge/Gym-Management-purple?style=for-the-badge)
+![Gym Management](https://img.shields.io/badge/Chole_Bhature-Fitness-purple?style=for-the-badge)
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
@@ -17,7 +17,7 @@
 
 ## 📋 Overview
 
-The **Gym Management System** is a comprehensive web-based application designed to streamline gym operations. Built with PHP and MySQL, it features a modern, aesthetic interface with gradient designs, interactive elements, and smart automation.
+The **Chole Bhature Fitness Gym Management System** is a comprehensive web-based application designed to streamline gym operations. Built with PHP and MySQL, it features a modern, aesthetic interface with gradient designs, interactive elements, and smart automation.
 
 ---
 
@@ -48,7 +48,7 @@ Before you begin, ensure you have:
 ### Step 4: Create the Database
 1. Open your browser and go to: `http://localhost/phpmyadmin`
 2. Click **New** in the left sidebar
-3. Enter database name: `nsfitness`
+3. Enter database name: `nsfitness` (keep the same database name)
 4. Click **Create**
 
 ### Step 5: Import Database Tables
@@ -67,15 +67,12 @@ Open your browser and navigate to:
 http://localhost/Gym-Management-System-DBMS/index.html
 ```
 
-**Admin Login:**
+**Admin Panel (Direct Access - No Login Required):**
 ```
-http://localhost/Gym-Management-System-DBMS/admin-login.php
+http://localhost/Gym-Management-System-DBMS/packages.php
 ```
 
-### Step 7: Login
-Use these credentials to access the admin panel:
-- **Username:** `admin`
-- **Password:** `password`
+> **Note:** The login page has been removed for easier access. Click the "Admin" button on any page to go directly to the admin panel.
 
 ---
 
@@ -92,34 +89,42 @@ Once logged in, you can access:
 
 ## 📸 Screenshots
 
-### 🔐 Login Page
-![Login Page](screenshots/admin_login_fresh_1767516143361.png)
-*Secure admin authentication with beautiful gradient design*
+### 🏋️ Login Page (Chole Bhature Fitness)
+![Login Page](screenshots/chole_bhature_login.png)
+*Beautiful gradient design with Chole Bhature Fitness branding*
 
 ### 📦 Packages Management
-![Packages Page](screenshots/redesigned_packages_page_1767517795615.png)
+![Packages Page](screenshots/chole_bhature_packages.png)
 *Create and manage membership packages with real-time statistics*
 
 ### 👨‍🏫 Trainers Management
-![Trainers Page](screenshots/redesigned_trainers_page_1767517802453.png)
+![Trainers Page](screenshots/chole_bhature_trainers.png)
 *Manage gym trainers with gender statistics and member assignments*
 
 ### 👥 Members Management
-![Members Page](screenshots/redesigned_members_page_1767517810989.png)
+![Members Page](screenshots/chole_bhature_members.png)
 *Register members with auto-generated IDs and batch tracking*
 
 ### 💳 Billing & Payments
-![Billing Page](screenshots/redesigned_billing_page_1767517820286.png)
+![Billing Page](screenshots/chole_bhature_billing.png)
 *Process payments with interactive payment methods and auto-fill*
+
+### 🏠 Homepage
+![Homepage](screenshots/chole_bhature_homepage.png)
+*Welcome page with Chole Bhature Fitness branding and hero section*
+
+### ℹ️ About Page
+![About Page](screenshots/chole_bhature_about.png)
+*About section showcasing gym information and trainers*
 
 ---
 
 ## ✨ Features
 
-### 🔐 **Admin Authentication**
-- Secure login system for administrators
-- Beautiful gradient login page with modern design
-- Session management for secure access
+### 🚀 **Direct Admin Access**
+- No login required - instant access to admin panel
+- Beautiful Chole Bhature Fitness branding throughout
+- Streamlined user experience
 
 ### 📦 **Package Management**
 - Create and manage membership packages
@@ -305,7 +310,7 @@ Once running, access these pages:
 | Page | URL |
 |------|-----|
 | Homepage | `http://localhost/Gym-Management-System-DBMS/index.html` |
-| Admin Login | `http://localhost/Gym-Management-System-DBMS/admin-login.php` |
+| Admin Panel | `http://localhost/Gym-Management-System-DBMS/packages.php` |
 | Packages | `http://localhost/Gym-Management-System-DBMS/packages.php` |
 | Trainers | `http://localhost/Gym-Management-System-DBMS/trainers.php` |
 | Members | `http://localhost/Gym-Management-System-DBMS/members.php` |
@@ -318,11 +323,11 @@ Once running, access these pages:
 
 > ⚠️ **Important:** This is a development/educational project
 
-- Change default admin credentials before production use
-- Implement password hashing (currently plain text)
+- **No authentication is currently implemented** - add login system for production
 - Add input sanitization for production
 - Use prepared statements to prevent SQL injection
 - Enable HTTPS in production
+- Implement role-based access control
 
 ---
 
@@ -364,7 +369,7 @@ This project is open source and available for educational purposes.
 
 <div align="center">
 
-**Made with ❤️ for Gym Owners Everywhere**
+**Made with ❤️ by Chole Bhature Fitness**
 
 ⭐ Star this repo if you find it useful!
 
